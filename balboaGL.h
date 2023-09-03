@@ -21,6 +21,7 @@ const int MINUTES_PER_DEGC = 45;
 
 extern int RTS_PIN;
 extern int PIN_5_PIN;
+extern int LED_PIN;
 
 #define tub Serial2
 

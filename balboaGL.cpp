@@ -2,6 +2,7 @@
 
 int RTS_PIN;
 int PIN_5_PIN;
+int LED_PIN = 2;
 
 String result = "";
 int msgLength = 0;
@@ -312,7 +313,7 @@ void handleMessage() {
 void sendCommand() {
     if (!sendBuffer.isEmpty()) {
         digitalWrite(RTS_PIN, HIGH);
-        digitalWrite(LED_BUILTIN, HIGH);
+        digitalWrite(LED_PIN, HIGH);
 
         delayMicroseconds(delayTime);
         // Serial.println("Sending " + sendBuffer);
@@ -337,7 +338,7 @@ void sendCommand() {
         //   Serial.println("ERROR: Pin5 went high before command could be sent after flush");
         // }
         digitalWrite(RTS_PIN, LOW);
-        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(LED_PIN, LOW);
     }
 }
 
