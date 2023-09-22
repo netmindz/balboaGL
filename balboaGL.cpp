@@ -1,8 +1,6 @@
 #include "balboaGL.h"
 
-int RTS_PIN;
-int PIN_5_PIN;
-int LED_PIN = 2;
+
 
 String result = "";
 int msgLength = 0;
@@ -13,24 +11,24 @@ struct BalboaStatus status;
 
 int delayTime = 40;
 
-void sendCommand(String command, int count) {
+void balboaGL::queueCommand(String command, int count) {
     Serial.printf("Sending %s - %u times\n", command.c_str(), count);
     for (int i = 0; i < count; i++) {
         sendBuffer.enqueue(command.c_str());
     }
 }
 
-void setOption(int currentIndex, int targetIndex, int options, String command) {
+void balboaGL::setOption(int currentIndex, int targetIndex, int options, String command) {
     if (targetIndex > currentIndex) {
-        sendCommand(command, (targetIndex - currentIndex));
+        queueCommand(command, (targetIndex - currentIndex));
     } else if (currentIndex != targetIndex) {
         int presses = (options - currentIndex) + targetIndex;
-        sendCommand(command, presses);
+        queueCommand(command, presses);
     }
 }
 
 
-void handleBytes(size_t len, uint8_t buf[]) {
+void balboaGL::handleBytes(size_t len, uint8_t buf[]) {
 
     for (int i = 0; i < len; i++) {
         if (buf[i] < 0x10) {
@@ -57,7 +55,7 @@ void handleBytes(size_t len, uint8_t buf[]) {
     }
 }
 
-void handleMessage() {
+void balboaGL::handleMessage() {
     
     // Set as static, so only allocating memory once, not per method call - as when was global
     static int pump1State = 0;
@@ -310,7 +308,7 @@ void handleMessage() {
     }
 }
 
-void sendCommand() {
+void balboaGL::sendCommand() {
     if (!sendBuffer.isEmpty()) {
         digitalWrite(RTS_PIN, HIGH);
         digitalWrite(LED_PIN, HIGH);
@@ -342,7 +340,7 @@ void sendCommand() {
     }
 }
 
-String HexString2TimeString(String hexstring) {
+String balboaGL::HexString2TimeString(String hexstring) {
     // Convert "HHMM" in HEX to "HH:MM" with decimal representation
     String time = "";
     int hour = strtol(hexstring.substring(0, 2).c_str(), NULL, 16);
@@ -357,7 +355,7 @@ String HexString2TimeString(String hexstring) {
     return time;
 }
 
-String HexString2ASCIIString(String hexstring) {
+String balboaGL::HexString2ASCIIString(String hexstring) {
     String temp = "", sub = "", result;
     char buf[3];
     for (int i = 0; i < hexstring.length(); i += 2) {
@@ -370,14 +368,14 @@ String HexString2ASCIIString(String hexstring) {
     return temp;
 }
 
-byte nibble(char c) {
+byte balboaGL::nibble(char c) {
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'f') return c - 'a' + 10;
     if (c >= 'A' && c <= 'F') return c - 'A' + 10;
     return 0;  // Not a valid hexadecimal character
 }
 
-void hexCharacterStringToBytes(byte* byteArray, const char* hexString) {
+void balboaGL::hexCharacterStringToBytes(byte* byteArray, const char* hexString) {
     bool oddLength = strlen(hexString) & 1;
 
     byte currentByte = 0;
@@ -410,4 +408,12 @@ void hexCharacterStringToBytes(byte* byteArray, const char* hexString) {
             }
         }
     }
+}
+
+int balboaGL::getPanelSelectPin() {
+    return PIN_5_PIN;
+}
+
+int balboaGL::getRTSPin() {
+    return RTS_PIN;
 }

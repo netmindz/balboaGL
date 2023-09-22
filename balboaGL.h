@@ -19,9 +19,7 @@ const float POWER_PUMP2_HIGH = 0.6;
 // Tweak for your tub - would be nice to auto-learn in the future to allow for outside temp etc
 const int MINUTES_PER_DEGC = 45;
 
-extern int RTS_PIN;
-extern int PIN_5_PIN;
-extern int LED_PIN;
+
 
 #define tub Serial2
 
@@ -51,7 +49,20 @@ struct BalboaStatus {
 
 extern struct BalboaStatus status;
 
-void sendCommand(String command, int count);
+class balboaGL {
+    public:
+    balboaGL(int rtsPin, int panelSelectPin, int ledPin = 2) {
+        this->RTS_PIN = rtsPin;
+        this->PIN_5_PIN = panelSelectPin;
+        this->LED_PIN = ledPin;
+
+        pinMode(RTS_PIN, OUTPUT);
+        Serial.printf("Setting pin %u LOW\n", RTS_PIN);
+        digitalWrite(RTS_PIN, LOW);
+        pinMode(PIN_5_PIN, INPUT);
+    }
+
+void queueCommand(String command, int count);
 
 void setOption(int currentIndex, int targetIndex, int options, String command);
 
@@ -61,6 +72,17 @@ void handleMessage();
 
 void sendCommand();
 
+int getPanelSelectPin();
+
+int getRTSPin();
+
+
+    private:
+
+    int RTS_PIN;
+    int PIN_5_PIN;
+    int LED_PIN;
+
 String HexString2TimeString(String hexstring);
 
 String HexString2ASCIIString(String hexstring);
@@ -69,6 +91,8 @@ byte nibble(char c);
 
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 
-void telnetSend(String message);
+void telnetSend(String message) {} // FIXME
+
+};
 
 #endif
