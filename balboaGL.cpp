@@ -426,7 +426,7 @@ void balboaGL::readSerial() {
         uint8_t buf[len];  // TODO: swap to fixed buffer to help prevent fragmentation of memory
         tub.read(buf, len);
         if (panelSelect == LOW) {  // Only read data meant for us
-            spa.handleBytes(len, buf);
+            handleBytes(len, buf);
         } else {
             // Serial.print("H");
             result = "";

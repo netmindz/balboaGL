@@ -71,6 +71,7 @@ int getPanelSelectPin();
 
 int getRTSPin();
 
+void readSerial();
 
 private:
 
