@@ -46,7 +46,8 @@ extern struct BalboaStatus status;
 
 class balboaGL {
     public:
-    balboaGL(int rtsPin, int panelSelectPin, int ledPin = 2) {
+    balboaGL(HardwareSerial serial, int rtsPin, int panelSelectPin, int ledPin = 2) {
+        this->tub = serial;
         this->RTS_PIN = rtsPin;
         this->PIN_5_PIN = panelSelectPin;
         this->LED_PIN = ledPin;
