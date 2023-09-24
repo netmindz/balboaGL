@@ -320,7 +320,7 @@ void balboaGL::sendCommand() {
         // if(digitalRead(PIN_5_PIN) != LOW) {
         //   Serial.println("ERROR: Pin5 went high before command before write");
         // }
-        tub.write(byteArray, sizeof(byteArray));
+        tub->write(byteArray, sizeof(byteArray));
         if (digitalRead(PIN_5_PIN) != LOW) {
             Serial.printf("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
             // delayTime = 0;
@@ -420,11 +420,11 @@ int balboaGL::getRTSPin() {
 
 void balboaGL::readSerial() {
     bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
-    if (tub.available() > 0) {
-        size_t len = tub.available();
+    if (tub->available() > 0) {
+        size_t len = tub->available();
         //    Serial.printf("bytes avail = %u\n", len);
         uint8_t buf[len];  // TODO: swap to fixed buffer to help prevent fragmentation of memory
-        tub.read(buf, len);
+        tub->read(buf, len);
         if (panelSelect == LOW) {  // Only read data meant for us
             handleBytes(len, buf);
         } else {
