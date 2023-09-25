@@ -72,7 +72,7 @@ int getPanelSelectPin();
 
 int getRTSPin();
 
-void readSerial();
+size_t readSerial();
 
 private:
 
