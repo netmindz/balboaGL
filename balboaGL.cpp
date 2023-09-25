@@ -418,10 +418,10 @@ int balboaGL::getRTSPin() {
     return RTS_PIN;
 }
 
-void balboaGL::readSerial() {
+size_t balboaGL::readSerial() {
     bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
-    if (tub->available() > 0) {
-        size_t len = tub->available();
+    size_t len = tub->available();
+    if (len > 0) {
         //    Serial.printf("bytes avail = %u\n", len);
         uint8_t buf[len];  // TODO: swap to fixed buffer to help prevent fragmentation of memory
         tub->read(buf, len);
@@ -433,4 +433,5 @@ void balboaGL::readSerial() {
             msgLength = 0;
         }
     }
+    return len;
 }
