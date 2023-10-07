@@ -56,6 +56,17 @@ void balboaGL::handleBytes(size_t len, uint8_t buf[]) {
     }
 }
 
+void balboaGL::setTimeToTemp(double currentTemp) {
+
+    if (status.heater && (currentTemp < status.targetTemp)) {
+        double tempDiff = (status.targetTemp - currentTemp);
+        float timeToTempValue = (tempDiff * MINUTES_PER_DEGC);
+        status.timeToTemp = timeToTempValue;
+    } else {
+        status.timeToTemp = 0;
+    }
+}
+
 void balboaGL::handleMessage() {
     
     // Set as static, so only allocating memory once, not per method call - as when was global
@@ -246,13 +257,7 @@ void balboaGL::handleMessage() {
                             tubTemp = status.temp;
                             Serial.printf("Sent temp data %f\n", tubTemp);
                         }
-                        if (status.heater && (tubTemp < status.targetTemp)) {
-                            double tempDiff = (status.targetTemp - tubTemp);
-                            float timeToTempValue = (tempDiff * MINUTES_PER_DEGC);
-                            status.timeToTemp = timeToTempValue;
-                        } else {
-                            status.timeToTemp = 0;
-                        }
+                        setTimeToTemp(status.temp);
                     }
                 }
                 else if(Q_in[5] == 0x2D) {
@@ -260,13 +265,16 @@ void balboaGL::handleMessage() {
                 }
 
                 /* TEMP IN F (16) */
-                if(status.tempUnit = 0x43){
-                    // Unit is Celsius, doing conversion
-                    status.tempFromF = (Q_in[16]-32)*.55556;
-                    // status.tempFromF = round(tubState.tubTempF * 2)/2; // tweak to round to nearest half
-                }else if(status.tempUnit = 0x46){
-                    // Unit is Fahrenheit, no conversion needed.
-                    status.tempFromF = Q_in[16];
+                if(menu == "00") {
+                    if(status.tempUnit = 0x43){
+                        // Unit is Celsius, doing conversion
+                        status.tempFromF = (Q_in[16]-32)*.55556;
+                        setTimeToTemp(status.tempFromF);
+                    }else if(status.tempUnit = 0x46){
+                        // Unit is Fahrenheit, no conversion needed.
+                        status.tempFromF = Q_in[16];
+                        setTimeToTemp(status.tempFromF);
+                    }
                 }
 
                 status.state = state.c_str();

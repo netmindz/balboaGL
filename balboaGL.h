@@ -100,6 +100,7 @@ String HexString2ASCIIString(String hexstring);
 byte nibble(char c);
 
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
+void setTimeToTemp(double currentTemp);
 
 };
 
