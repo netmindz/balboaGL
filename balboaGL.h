@@ -81,6 +81,10 @@ int getRTSPin();
 
 size_t readSerial();
 
+void setLight(boolean state);
+
+void setTemp(float temperature);
+
 private:
 
     int RTS_PIN;

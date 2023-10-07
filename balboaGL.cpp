@@ -452,3 +452,40 @@ size_t balboaGL::readSerial() {
     }
     return len;
 }
+
+void balboaGL::setLight(boolean state) {
+    if (state != status.light) {
+        Serial.println("setLight - Toggle");
+        sendBuffer.enqueue(COMMAND_LIGHT);
+    } else {
+        Serial.println("setLight - No change needed");
+    }
+}
+
+void balboaGL::setTemp(float temperature) {
+
+    if (status.targetTemp <= 0) {
+        Serial.print("ERROR: can't adjust target as current value not known");
+        sendBuffer.enqueue(COMMAND_UP);  // Enter set temp mode - won't change, but should allow us to capture the set target value
+        return;
+    }
+
+    int target = temperature * 2;  // 0.5 inc so double
+    int current = status.targetTemp * 2;
+    sendBuffer.enqueue(COMMAND_UP);  // Enter set temp mode
+    sendBuffer.enqueue(COMMAND_EMPTY);
+
+    if (temperature > status.targetTemp) {
+        for (int i = 0; i < (target - current); i++) {
+            Serial.println("Raise the temp");
+            sendBuffer.enqueue(COMMAND_UP);
+            // sendBuffer.enqueue(COMMAND_EMPTY);
+        }
+    } else {
+        for (int i = 0; i < (current - target); i++) {
+            Serial.println("Lower the temp");
+            sendBuffer.enqueue(COMMAND_DOWN);
+            // sendBuffer.enqueue(COMMAND_EMPTY);
+        }
+    }
+}
