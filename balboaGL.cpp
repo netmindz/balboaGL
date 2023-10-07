@@ -35,6 +35,7 @@ void balboaGL::handleBytes(size_t len, uint8_t buf[]) {
             result += '0';
         }
         result += String(buf[i], HEX);
+        Q_in.push(buf[i]);
     }
     if (msgLength == 0 && result.length() >= 2) {
         String messageType = result.substring(0, 2);
@@ -63,8 +64,7 @@ void balboaGL::handleMessage() {
     static boolean heaterState = false;
     static boolean lightState = false;
     static float tubpowerCalc = 0;
-    static double tubTemp = -1;
-    static double tubTargetTemp = -1;
+    static float tubTemp = -1;
     static String state = "unknown";
     static String lastRaw = "";
     static String lastRaw2 = "";
@@ -130,6 +130,9 @@ void balboaGL::handleMessage() {
                 tubpowerCalc += POWER_PUMP2_HIGH;
             }
 
+            String aux = result.substring(12,13);
+            status.aux = aux; // TODO: put raw value into status till values known
+
             String heater = result.substring(14, 15);
             if (heater == "0") {
                 heaterState = false;
@@ -149,6 +152,9 @@ void balboaGL::handleMessage() {
             } else if (light == "3") {
                 lightState = true;
             }
+
+            /* LCD DISPLAY (2,3,4,5) */
+            sprintf(status.lcd, "%c%c%c%c", Q_in[2], Q_in[3], Q_in[4], Q_in[5]);
 
             // Ignore last 2 bytes as possibly checksum, given we have temp earlier making look more complex than
             // perhaps it is
@@ -228,32 +234,43 @@ void balboaGL::handleMessage() {
                     status.rawData3 = lastRaw3.c_str();
                 }
 
-                if (result.substring(10, 12) == "43") {  // "C"
-                    double tmp = (HexString2ASCIIString(result.substring(4, 10)).toDouble() / 10);
-                    if (menu == "46") {
-                        tubTargetTemp = tmp;
-                        status.targetTemp = (float)tubTargetTemp;
-                        Serial.printf("Sent target temp data %f\n", tubTargetTemp);
-                    } else {
-                        if (tubTemp != tmp) {
-                            tubTemp = tmp;
-                            status.temp = (float)tubTemp;
+
+                // Check for degrees C (0x43) or F (0x46), then we have a temperature
+                if (Q_in[5] == 0x43 || Q_in[5] == 0x46) {
+                    status.tempUnit = Q_in[5];
+                    char temp[4] = {char(Q_in[2]), char(Q_in[3]), char(Q_in[4])};
+
+                    //When display showing C or F, and menu mode 0x46 we're in temperature setpoint adjustment
+                    if(Q_in[9] == 0x46){
+                        status.targetTemp = atoi(temp)/10.0;
+                        Serial.printf("Sent target temp data %f\n", status.targetTemp);
+                    }else{
+                        status.temp = atoi(temp)/10.0;
+                        if (tubTemp != status.temp) {
+                            tubTemp = status.temp;
                             Serial.printf("Sent temp data %f\n", tubTemp);
                         }
-                        if (heaterState && (tubTemp < tubTargetTemp)) {
-                            double tempDiff = (tubTargetTemp - tubTemp);
+                        if (heaterState && (tubTemp < status.targetTemp)) {
+                            double tempDiff = (status.targetTemp - tubTemp);
                             float timeToTempValue = (tempDiff * MINUTES_PER_DEGC);
                             status.timeToTemp = timeToTempValue;
                         } else {
                             status.timeToTemp = 0;
                         }
                     }
-                } else if (result.substring(10, 12) == "2d") {  // "-"
-                                                                //          Serial.println("temp = unknown");
-                                                                //          telnetSend("temp = unknown");
-                } else {
-                    Serial.println("non-temp " + result);
-                    telnetSend("non-temp " + result);
+                }
+                else if(Q_in[5] == 0x2D) {
+                    // Showing '-'
+                }
+
+                /* TEMP IN F (16) */
+                if(status.tempUnit = 0x43){
+                    // Unit is Celsius, doing conversion
+                    status.tempFromF = (Q_in[16]-32)*.55556;
+                    // status.tempFromF = round(tubState.tubTempF * 2)/2; // tweak to round to nearest half
+                }else if(status.tempUnit = 0x46){
+                    // Unit is Fahrenheit, no conversion needed.
+                    status.tempFromF = Q_in[16];
                 }
 
                 status.state = state.c_str();
@@ -431,6 +448,7 @@ size_t balboaGL::readSerial() {
             // Serial.print("H");
             result = "";
             msgLength = 0;
+            Q_in.clear();
         }
     }
     return len;

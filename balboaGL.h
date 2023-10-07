@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <ArduinoQueue.h>
+#include <CircularBuffer.h>
 
 #include "constants.h"
 
@@ -32,17 +33,23 @@ struct BalboaStatus {
     String rawData7; // TODO: better name
     float targetTemp;
     float temp;
+    float tempFromF;
     float timeToTemp;
+    int tempUnit;
     int mode;
     int pump1;
     int pump2;
+    String aux;
     String time;
     boolean heater;
     boolean light;
     String state;
+    char lcd[5];
 };
 
 extern struct BalboaStatus status;
+
+extern void telnetSend(String message);
 
 class balboaGL {
     public:
@@ -82,6 +89,10 @@ private:
 
     HardwareSerial* tub;
 
+    #define BUFFER_SIZE 23
+    CircularBuffer<uint8_t, BUFFER_SIZE> Q_in;
+
+
 String HexString2TimeString(String hexstring);
 
 String HexString2ASCIIString(String hexstring);
@@ -89,8 +100,6 @@ String HexString2ASCIIString(String hexstring);
 byte nibble(char c);
 
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
-
-void telnetSend(String message) {} // FIXME
 
 };
 
