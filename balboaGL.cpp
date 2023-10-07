@@ -59,10 +59,6 @@ void balboaGL::handleBytes(size_t len, uint8_t buf[]) {
 void balboaGL::handleMessage() {
     
     // Set as static, so only allocating memory once, not per method call - as when was global
-    static int pump1State = 0;
-    static int pump2State = 0;
-    static boolean heaterState = false;
-    static boolean lightState = false;
     static float tubpowerCalc = 0;
     static float tubTemp = -1;
     static String state = "unknown";
@@ -90,42 +86,42 @@ void balboaGL::handleMessage() {
             String pump = result.substring(13, 14);
 
             if (pump == "0") {  // Pump 1 Off - Pump 2 Off - 0b0000
-                pump1State = 0;
-                pump2State = 0;
+                status.pump1 = 0;
+                status.pump2 = 0;
             } else if (pump == "1") {  // Pump 1 Low - Pump 2 Off - 0b0001
-                pump1State = 1;
-                pump2State = 0;
+                status.pump1 = 1;
+                status.pump2 = 0;
                 tubpowerCalc += POWER_PUMP1_LOW;
             } else if (pump == "2") {  // Pump 1 High - Pump 2 Off - 0b0010
-                pump1State = PUMP1_STATE_HIGH;
-                pump2State = 0;
+                status.pump1 = PUMP1_STATE_HIGH;
+                status.pump2 = 0;
                 tubpowerCalc += POWER_PUMP1_HIGH;
             } else if (pump == "4") {  // Pump 1 Off - Pump 2 Low - 0b0100
-                pump1State = 0;
-                pump2State = 1;
+                status.pump1 = 0;
+                status.pump2 = 1;
                 tubpowerCalc += POWER_PUMP2_LOW;
             } else if (pump == "5") {  // Pump 1 Low - Pump 2 Low - 0b0101
-                pump1State = 1;
-                pump2State = 1;
+                status.pump1 = 1;
+                status.pump2 = 1;
                 tubpowerCalc += POWER_PUMP1_LOW;
                 tubpowerCalc += POWER_PUMP2_LOW;
             } else if (pump == "6") {  // Pump 1 High - Pump 2 Low - 0b0110
-                pump1State = PUMP1_STATE_HIGH;
-                pump2State = 1;
+                status.pump1 = PUMP1_STATE_HIGH;
+                status.pump2 = 1;
                 tubpowerCalc += POWER_PUMP1_HIGH;
                 tubpowerCalc += POWER_PUMP2_LOW;
             } else if (pump == "8") {  // Pump 1 Off - Pump 2 High - 0b1000
-                pump1State = 0;
-                pump2State = PUMP2_STATE_HIGH;
+                status.pump1 = 0;
+                status.pump2 = PUMP2_STATE_HIGH;
                 tubpowerCalc += POWER_PUMP2_HIGH;
             } else if (pump == "9") {  // Pump 1 Low - Pump 2 High - 0b1001
-                pump1State = 1;
-                pump2State = PUMP2_STATE_HIGH;
+                status.pump1 = 1;
+                status.pump2 = PUMP2_STATE_HIGH;
                 tubpowerCalc += POWER_PUMP1_LOW;
                 tubpowerCalc += POWER_PUMP2_HIGH;
             } else if (pump == "a") {  // Pump 1 High - Pump 2 HIGH = 0b1010
-                pump1State = PUMP1_STATE_HIGH;
-                pump2State = PUMP2_STATE_HIGH;
+                status.pump1 = PUMP1_STATE_HIGH;
+                status.pump2 = PUMP2_STATE_HIGH;
                 tubpowerCalc += POWER_PUMP1_HIGH;
                 tubpowerCalc += POWER_PUMP2_HIGH;
             }
@@ -135,12 +131,12 @@ void balboaGL::handleMessage() {
 
             String heater = result.substring(14, 15);
             if (heater == "0") {
-                heaterState = false;
+                status.heater = false;
             } else if (heater == "1") {
-                heaterState = true;
+                status.heater = true;
                 tubpowerCalc += POWER_HEATER;
             } else if (heater == "2") {
-                heaterState = true;  // heater off, verifying temp change, but creates noisy state if we return false
+                status.heater = true;  // heater off, verifying temp change, but creates noisy state if we return false
                 tubpowerCalc += POWER_HEATER;
             }
 
@@ -148,9 +144,9 @@ void balboaGL::handleMessage() {
 
             String light = result.substring(15, 16);
             if (light == "0") {
-                lightState = false;
+                status.light = false;
             } else if (light == "3") {
-                lightState = true;
+                status.light = true;
             }
 
             /* LCD DISPLAY (2,3,4,5) */
@@ -250,7 +246,7 @@ void balboaGL::handleMessage() {
                             tubTemp = status.temp;
                             Serial.printf("Sent temp data %f\n", tubTemp);
                         }
-                        if (heaterState && (tubTemp < status.targetTemp)) {
+                        if (status.heater && (tubTemp < status.targetTemp)) {
                             double tempDiff = (status.targetTemp - tubTemp);
                             float timeToTempValue = (tempDiff * MINUTES_PER_DEGC);
                             status.timeToTemp = timeToTempValue;
@@ -288,11 +284,6 @@ void balboaGL::handleMessage() {
                 status.rawData7 = lastRaw7.c_str();
             }
         }
-
-        status.pump1 = pump1State;
-        status.pump2 = pump2State;
-        status.heater = heaterState;
-        status.light = lightState;
 
         // end of FA14
     } else if (result.substring(0, 4) == "ae0d") {
