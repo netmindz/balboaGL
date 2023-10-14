@@ -331,7 +331,7 @@ void balboaGL::sendCommand() {
 
         delayMicroseconds(delayTime);
         // Serial.println("Sending " + sendBuffer);
-        byte byteArray[18] = {0};
+        byte byteArray[9] = {0};
         hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
         // if(digitalRead(PIN_5_PIN) != LOW) {
         //   Serial.println("ERROR: Pin5 went high before command before write");
