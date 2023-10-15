@@ -1,3 +1,4 @@
+#include "esp_log.h"
 
 #ifndef BALBOAGL_H
 #define BALBOAGL_H
@@ -7,6 +8,8 @@
 #include <CircularBuffer.h>
 
 #include "constants.h"
+
+static const char* BALBOA_TAG = "BalboaGL";
 
 // Perform measurements or read nameplate values on your tub to define the power [kW]
 // for each device in order to calculate tub power usage
@@ -60,7 +63,7 @@ class balboaGL {
         this->LED_PIN = ledPin;
 
         pinMode(RTS_PIN, OUTPUT);
-        Serial.printf("Setting pin %u LOW\n", RTS_PIN);
+        ESP_LOGD(BALBOA_TAG, "Setting pin %u LOW\n", RTS_PIN);
         digitalWrite(RTS_PIN, LOW);
         pinMode(PIN_5_PIN, INPUT);
     }
