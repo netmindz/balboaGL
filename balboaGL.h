@@ -1,3 +1,5 @@
+#undef ESP_LOGD
+
 #include "esp_log.h"
 
 #ifndef BALBOAGL_H
