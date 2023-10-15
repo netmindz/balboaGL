@@ -75,15 +75,17 @@ class balboaGL {
         ESP_LOGD(BALBOA_TAG, "Setting pin %u LOW\n", RTS_PIN);
         digitalWrite(RTS_PIN, LOW);
         pinMode(PIN_5_PIN, INPUT);
+
+        // enable interrupt for pin5 falling level change so we can clear the rx buffer
+        // everytime our panel is selected
+        attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, FALLING);
     }
 
 void queueCommand(String command, int count);
 
 void setOption(int currentIndex, int targetIndex, int options, String command);
 
-void handleBytes(size_t len, uint8_t buf[]);
-
-void handleMessage();
+void handleMessage(size_t len, uint8_t buf[]);
 
 void sendCommand();
 
@@ -117,6 +119,7 @@ byte nibble(char c);
 
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 void setTimeToTemp(double currentTemp);
+int waitforGLBytes();
 
 };
 

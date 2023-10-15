@@ -1,6 +1,6 @@
 #include "balboaGL.h"
 
-
+#include <driver/uart.h>
 
 String result = "";
 int msgLength = 0;
@@ -27,34 +27,15 @@ void balboaGL::setOption(int currentIndex, int targetIndex, int options, String 
     }
 }
 
+#define tubUART UART_NUM_1 // TODO: set based on serial port
 
-void balboaGL::handleBytes(size_t len, uint8_t buf[]) {
-
-    for (int i = 0; i < len; i++) {
-        if (buf[i] < 0x10) {
-            result += '0';
-        }
-        result += String(buf[i], HEX);
-        Q_in.push(buf[i]);
-    }
-    if (msgLength == 0 && result.length() >= 2) {
-        String messageType = result.substring(0, 2);
-        if (messageType == "fa") {
-            msgLength = FA_MESSAGE_LENGTH;
-        } else if (messageType == "ae") {
-            msgLength = 32;
-        } else {
-            ESP_LOGD(BALBOA_TAG, "Unknown message length for ");
-            ESP_LOGD(BALBOA_TAG, messageType);
-        }
-    } else if (result.length() >= msgLength) {
-        if (msgLength == FA_MESSAGE_LENGTH) {
-            sendCommand();  // send reply *before* we parse the FA string as we don't want to delay the reply by
-                            // say sending MQTT updates
-        }
-        handleMessage();
-    }
+// Triggered when pin5 falling - ie our panel is selected
+// clears serial receive buffer
+void IRAM_ATTR clearRXBuffer() {
+    // clear the rx buffer
+    uart_flush(tubUART);
 }
+
 
 void balboaGL::setTimeToTemp(double currentTemp) {
 
@@ -67,8 +48,20 @@ void balboaGL::setTimeToTemp(double currentTemp) {
     }
 }
 
-void balboaGL::handleMessage() {
-    
+void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
+    if (buf[0] == 0xFA) {
+        sendCommand();
+    }
+    result = "";
+    Q_in.clear();
+    for (int i = 0; i < len; i++) {
+        if (buf[i] < 0x10) {
+            result += '0';
+        }
+        result += String(buf[i], HEX);
+        Q_in.push(buf[i]);
+    }
+
     // Set as static, so only allocating memory once, not per method call - as when was global
     static float tubpowerCalc = 0;
     static float tubTemp = -1;
@@ -434,23 +427,59 @@ int balboaGL::getRTSPin() {
     return RTS_PIN;
 }
 
-size_t balboaGL::readSerial() {
-    bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
-    size_t len = tub->available();
-    if (len > 0) {
-        //    Serial.printf("bytes avail = %u\n", len);
-        uint8_t buf[len];  // TODO: swap to fixed buffer to help prevent fragmentation of memory
-        tub->read(buf, len);
-        if (panelSelect == LOW) {  // Only read data meant for us
-            handleBytes(len, buf);
-        } else {
-            // Serial.print("H");
-            result = "";
-            msgLength = 0;
-            Q_in.clear();
+const unsigned long readBytesTimeout = 2500; // Timeout in microseconds (2.5 ms)
+
+/*
+ * waitforGLBytes checks the first byte in the serial buffer
+ * since we've cleared the serial buffer when pin5 went low
+ * there will only be data meant for our panel in the buffer.
+ * Depending on the message type, wait for the expected number
+ * of bytes to be available with a timeout of 2ms
+ * returns number of bytes to read
+ */
+int balboaGL::waitforGLBytes() {
+    int msgLength = 0;
+    // define message length from starting Byte
+    switch (tub->peek()) {
+    case 0xFA:
+        msgLength = 23;
+        break;
+    case 0xAE:
+        msgLength = 16;
+        break;
+    default:
+        ESP_LOGW(BALBOA_TAG, "Unknown message start Byte: ");
+        int peekedByte = tub->peek();
+        ESP_LOGW(BALBOA_TAG, peekedByte, HEX);
+        return 0;
+    }
+    // we'll wait here for up to 2.5ms until the expected number of bytes are available
+    unsigned long startTime = micros();
+    while (tub->available() < msgLength) {
+        if (micros() - startTime >= readBytesTimeout) {
+            ESP_LOGW(BALBOA_TAG, "Timeout: %u bytes not available in 2.5ms\n", msgLength);
+            return 0;
         }
     }
-    return len;
+    return msgLength;
+}
+
+size_t balboaGL::readSerial() {
+    bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
+    // is data available and we are selected
+    if ((tub->available() > 0) && (panelSelect == LOW)) {
+        int msgLength = waitforGLBytes();
+        // only do something if we've got a message
+        if (msgLength > 0) {
+            uint8_t buf[msgLength];
+            tub->read(buf, msgLength);
+            handleMessage(msgLength, buf);
+        }
+        return msgLength;
+    }
+    else {
+        return 0;
+    }
 }
 
 void balboaGL::setLight(boolean state) {
