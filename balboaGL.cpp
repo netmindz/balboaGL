@@ -450,6 +450,8 @@ size_t balboaGL::readSerial() {
             Q_in.clear();
         }
     }
+    return len;
+}
 
 void balboaGL::setLight(boolean state) {
     if (state != status.light) {
