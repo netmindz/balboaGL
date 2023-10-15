@@ -1,8 +1,9 @@
-#undef ESP_LOGD
+#ifdef ESP_LOGD
+using esphome
+#endif
 
 #include "esp_log.h"
 
-#define ESP_LOGD( tag, format, ... ) ESP_LOG_LEVEL_LOCAL(ESP_LOG_DEBUG,   tag, format, ##__VA_ARGS__)
 
 
 #ifndef BALBOAGL_H
