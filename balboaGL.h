@@ -63,6 +63,8 @@ extern struct BalboaStatus status;
 
 extern void telnetSend(String message);
 
+extern void clearRXBuffer();
+
 class balboaGL {
     public:
     balboaGL(HardwareSerial* serial, int rtsPin, int panelSelectPin, int ledPin = 2) {
