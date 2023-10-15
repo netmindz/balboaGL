@@ -1,5 +1,5 @@
 #ifdef ESP_LOGD
-using esphome
+using namespace esphome;
 #endif
 
 #include "esp_log.h"
