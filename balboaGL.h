@@ -1,5 +1,8 @@
-#ifdef ESP_LOGD
+#ifdef ESPHOME_LOG_LEVEL_NONE
 using namespace esphome;
+#ifndef ESPHOME_LOG_LEVEL
+#define ESPHOME_LOG_LEVEL ESPHOME_LOG_LEVEL_DEBUG
+#endif
 #endif
 
 #include "esp_log.h"
