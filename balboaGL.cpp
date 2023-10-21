@@ -27,8 +27,6 @@ void balboaGL::setOption(int currentIndex, int targetIndex, int options, String 
     }
 }
 
-#define tubUART UART_NUM_1 // TODO: set based on serial port
-
 // Triggered when pin5 falling - ie our panel is selected
 // clears serial receive buffer
 void IRAM_ATTR clearRXBuffer() {
