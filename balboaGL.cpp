@@ -286,9 +286,9 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
 
         // end of FA14
     } else if (result.substring(0, 2) == "fb") {
-        if (result != lastFB) {
-            lastFB = result;
-            status.rawData7 = lastFB.c_str();
+        if (result != lastRaw7) {
+            lastRaw7 = result;
+            status.rawData7 = lastRaw7.c_str();
         }
     } else if (result.substring(0, 4) == "ae0d") {
         // ESP_LOGD(BALBOA_TAG, "AE 0D");
@@ -336,7 +336,7 @@ void balboaGL::sendCommand() {
             sendBuffer.dequeue();
         }
         // wait for tx to finish and flush the rx buffer
-        tub.flush(false);
+        tub->flush(false);
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
             ESP_LOGD(BALBOA_TAG, "message sent : %u\n", delayTime);
