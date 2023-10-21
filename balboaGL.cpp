@@ -287,6 +287,11 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
         }
 
         // end of FA14
+    } else if (result.substring(0, 2) == "fb") {
+        if (result != lastFB) {
+            lastFB = result;
+            status.rawData7 = lastFB.c_str();
+        }
     } else if (result.substring(0, 4) == "ae0d") {
         // ESP_LOGD(BALBOA_TAG, "AE 0D");
         // telnetSend(result);
@@ -326,24 +331,22 @@ void balboaGL::sendCommand() {
         // ESP_LOGD(BALBOA_TAG, "Sending " + sendBuffer);
         byte byteArray[9] = {0};
         hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
-        // if(digitalRead(PIN_5_PIN) != LOW) {
-        //   ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command before write");
-        // }
         tub->write(byteArray, sizeof(byteArray));
         if (digitalRead(PIN_5_PIN) != LOW) {
             ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command before flush : %u\n", delayTime);
             // delayTime = 0;
             sendBuffer.dequeue();
         }
-        // tub.flush(true);
+        // wait for tx to finish and flush the rx buffer
+        tub.flush(false);
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
             ESP_LOGD(BALBOA_TAG, "message sent : %u\n", delayTime);
             // delayTime += 10;
         }
-        // else {
-        //   ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command could be sent after flush");
-        // }
+        else {
+           ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command could be sent after flush");
+        }
         digitalWrite(RTS_PIN, LOW);
         digitalWrite(LED_PIN, LOW);
     }
@@ -443,6 +446,9 @@ int balboaGL::waitforGLBytes() {
     switch (tub->peek()) {
     case 0xFA:
         msgLength = 23;
+        break;
+    case 0xFB:
+        msgLength = 9;
         break;
     case 0xAE:
         msgLength = 16;
