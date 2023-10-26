@@ -321,7 +321,12 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
 }
 
 void balboaGL::sendCommand() {
-    if (!sendBuffer.isEmpty()) {
+    static unsigned long lastCmdTime = 0;
+    if (sendBuffer.isEmpty()) {
+        return;
+    }
+    if((millis() - lastCmdTime) >= 1000) {
+        lastCmdTime = millis();
         digitalWrite(RTS_PIN, HIGH);
         digitalWrite(LED_PIN, HIGH);
 
