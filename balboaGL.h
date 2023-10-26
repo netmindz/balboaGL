@@ -65,7 +65,10 @@ extern void telnetSend(String message);
 
 class balboaGL {
     public:
-    balboaGL(HardwareSerial* serial, int rtsPin, int panelSelectPin, int ledPin = 2) {
+    balboaGL(HardwareSerial* serial, int rtsPin, int panelSelectPin, esp_log_level_t logLevel = ESP_LOG_INFO, int ledPin = 2) {
+        
+        esp_log_level_set(BALBOA_TAG, logLevel);
+        
         this->tub = serial;
         this->RTS_PIN = rtsPin;
         this->PIN_5_PIN = panelSelectPin;
