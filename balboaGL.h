@@ -63,8 +63,6 @@ extern struct BalboaStatus status;
 
 extern void telnetSend(String message);
 
-extern void clearRXBuffer();
-
 class balboaGL {
     public:
     balboaGL(HardwareSerial* serial, int rtsPin, int panelSelectPin, int ledPin = 2) {
@@ -77,10 +75,6 @@ class balboaGL {
         ESP_LOGD(BALBOA_TAG, "Setting pin %u LOW\n", RTS_PIN);
         digitalWrite(RTS_PIN, LOW);
         pinMode(PIN_5_PIN, INPUT);
-
-        // enable interrupt for pin5 falling level change so we can clear the rx buffer
-        // everytime our panel is selected
-        attachPanelInterrupt();
     }
 
 void queueCommand(String command, int count);

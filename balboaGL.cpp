@@ -454,20 +454,20 @@ int balboaGL::waitforGLBytes() {
     int msgLength = 0;
     // define message length from starting Byte
     switch (tub->peek()) {
-    case 0xFA:
-        msgLength = 23;
-        break;
-    case 0xFB:
-        msgLength = 9;
-        break;
-    case 0xAE:
-        msgLength = 16;
-        break;
-    default:
-        ESP_LOGW(BALBOA_TAG, "Unknown message start Byte: ");
-        int peekedByte = tub->peek();
-        ESP_LOGW(BALBOA_TAG, peekedByte, HEX);
-        return 0;
+        case 0xFA:
+            msgLength = 23;
+            break;
+        case 0xFB:
+            msgLength = 9;
+            break;
+        case 0xAE:
+            msgLength = 16;
+            break;
+        default:
+            ESP_LOGW(BALBOA_TAG, "Unknown message start Byte: ");
+            int unknownByte = tub->read();
+            ESP_LOGW(BALBOA_TAG, unknownByte, HEX);
+            return 0;
     }
     // we'll wait here for up to 2.5ms until the expected number of bytes are available
     unsigned long startTime = micros();
