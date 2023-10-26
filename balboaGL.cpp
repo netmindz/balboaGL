@@ -34,6 +34,13 @@ void IRAM_ATTR clearRXBuffer() {
     uart_flush(tubUART);
 }
 
+void balboaGL::attachPanelInterrupt() {
+    attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, FALLING);
+}
+
+void balboaGL::detachPanelInterrupt() {
+    detachInterrupt(digitalPinToInterrupt(PIN_5_PIN));
+}
 
 void balboaGL::setTimeToTemp(double currentTemp) {
 

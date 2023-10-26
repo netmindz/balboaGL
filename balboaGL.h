@@ -80,7 +80,7 @@ class balboaGL {
 
         // enable interrupt for pin5 falling level change so we can clear the rx buffer
         // everytime our panel is selected
-        attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, FALLING);
+        attachPanelInterrupt();
     }
 
 void queueCommand(String command, int count);
@@ -100,6 +100,9 @@ size_t readSerial();
 void setLight(boolean state);
 
 void setTemp(float temperature);
+
+void detachPanelInterrupt();
+void attachPanelInterrupt();
 
 private:
 
