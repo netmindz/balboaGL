@@ -112,6 +112,9 @@ private:
     #define BUFFER_SIZE 23
     CircularBuffer<uint8_t, BUFFER_SIZE> Q_in;
 
+    unsigned long lastCmdTime = 0;
+    bool commandPending = false;
+
 
 String HexString2TimeString(String hexstring);
 
