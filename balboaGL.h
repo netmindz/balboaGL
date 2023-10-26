@@ -84,10 +84,6 @@ void queueCommand(String command, int count);
 
 void setOption(int currentIndex, int targetIndex, int options, String command);
 
-void handleMessage(size_t len, uint8_t buf[]);
-
-void sendCommand();
-
 int getPanelSelectPin();
 
 int getRTSPin();
@@ -125,6 +121,8 @@ byte nibble(char c);
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 void setTimeToTemp(double currentTemp);
 int waitforGLBytes();
+void sendCommand();
+void handleMessage(size_t len, uint8_t buf[]);
 
 };
 
