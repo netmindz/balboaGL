@@ -229,9 +229,12 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                     telnetSend("CMD: " + cmd);
                 }
                 if (!lastRaw3.equals(cmd)) {
-                    // Controller responded to command
-                    sendBuffer.dequeue();
-                    ESP_LOGD(BALBOA_TAG, "YAY: command response : %u\n", delayTime);
+                    if(commandPending) {
+                        // Controller responded to command
+                        sendBuffer.dequeue();
+                        commandPending = false;
+                        ESP_LOGD(BALBOA_TAG, "YAY: command response : %u\n", delayTime);
+                    }
                 }
 
                 if (!lastRaw3.equals(cmd) && cmd != "0000000000") {  // ignore idle command
