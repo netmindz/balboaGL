@@ -325,7 +325,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
         // end of AE 0D
     } else {
         ESP_LOGD(BALBOA_TAG, "Unknown message (%u): ", result.length());
-        ESP_LOGD(BALBOA_TAG, result);
+        // ESP_LOGD(BALBOA_TAG, result);
         telnetSend("U: " + result);
     }
 }
@@ -469,7 +469,7 @@ int balboaGL::waitforGLBytes() {
         default:
             ESP_LOGW(BALBOA_TAG, "Unknown message start Byte: ");
             int unknownByte = tub->read();
-            ESP_LOGW(BALBOA_TAG, unknownByte, HEX);
+            //ESP_LOGW(BALBOA_TAG, unknownByte, HEX);
             return 0;
     }
     // we'll wait here for up to 2.5ms until the expected number of bytes are available
