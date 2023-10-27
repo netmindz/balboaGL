@@ -59,6 +59,7 @@ struct BalboaStatus {
     boolean light;
     String state;
     char lcd[5];
+    int commandQueue;
 };
 
 extern struct BalboaStatus status;

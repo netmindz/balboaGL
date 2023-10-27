@@ -363,6 +363,7 @@ void balboaGL::sendCommand() {
         digitalWrite(RTS_PIN, LOW);
         digitalWrite(LED_PIN, LOW);
     }
+    status.commandQueue = sendBuffer.itemCount();
 }
 
 String balboaGL::HexString2TimeString(String hexstring) {
