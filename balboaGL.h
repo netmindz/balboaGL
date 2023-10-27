@@ -7,7 +7,9 @@ using namespace esphome;
 
 #include "esp_log.h"
 
-
+#ifndef tubUART
+#define tubUART 1
+#endif
 
 #ifndef BALBOAGL_H
 #define BALBOAGL_H
