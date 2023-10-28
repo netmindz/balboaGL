@@ -267,11 +267,11 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
 
                 /* TEMP IN F (16) */
                 if(menu == "00") {
-                    if(status.tempUnit = 0x43){
+                    if(status.tempUnit == 0x43){
                         // Unit is Celsius, doing conversion
                         status.tempFromF = (Q_in[16]-32)*.55556;
                         setTimeToTemp(status.tempFromF);
-                    }else if(status.tempUnit = 0x46){
+                    }else if(status.tempUnit == 0x46){
                         // Unit is Fahrenheit, no conversion needed.
                         status.tempFromF = Q_in[16];
                         setTimeToTemp(status.tempFromF);
