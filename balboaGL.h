@@ -49,17 +49,17 @@ struct BalboaStatus {
     float temp;
     float tempFromF;
     float timeToTemp;
-    int tempUnit;
-    int mode;
-    int pump1;
-    int pump2;
+    u_int8_t tempUnit;
+    u_int8_t mode;
+    u_int8_t pump1;
+    u_int8_t pump2;
     String aux;
     String time;
     boolean heater;
     boolean light;
     String state;
     char lcd[5];
-    int commandQueue;
+    u_int8_t commandQueue;
 };
 
 extern struct BalboaStatus status;
