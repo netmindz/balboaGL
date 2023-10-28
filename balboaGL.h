@@ -66,6 +66,8 @@ extern struct BalboaStatus status;
 
 extern void telnetSend(String message);
 
+extern void log(const char *format, ...);
+
 class balboaGL {
     public:
     balboaGL(HardwareSerial* serial, int rtsPin, int panelSelectPin, esp_log_level_t logLevel = ESP_LOG_INFO, int ledPin = 2) {
@@ -78,7 +80,7 @@ class balboaGL {
         this->LED_PIN = ledPin;
 
         pinMode(RTS_PIN, OUTPUT);
-        ESP_LOGD(BALBOA_TAG, "Setting pin %u LOW\n", RTS_PIN);
+        log("Setting pin %u LOW\n", RTS_PIN);
         digitalWrite(RTS_PIN, LOW);
         pinMode(PIN_5_PIN, INPUT);
     }

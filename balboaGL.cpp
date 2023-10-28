@@ -12,7 +12,7 @@ struct BalboaStatus status;
 int delayTime = 40;
 
 void balboaGL::queueCommand(String command, int count) {
-    ESP_LOGD(BALBOA_TAG, "Sending %s - %u times\n", command.c_str(), count);
+    log("Sending %s - %u times\n", command.c_str(), count);
     for (int i = 0; i < count; i++) {
         sendBuffer.enqueue(command.c_str());
     }
@@ -80,11 +80,11 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
     static String lastRaw7 = "";
     static String timeString = "";
 
-    //      ESP_LOGD(BALBOA_TAG, "message = ");
-    //      ESP_LOGD(BALBOA_TAG, result);
+    //      log("message = ");
+    //      log(result);
 
     if (result.substring(0, 4) == "fa14") {
-        // ESP_LOGD(BALBOA_TAG, "FA 14");
+        // log("FA 14");
         // telnetSend(result);
 
         // fa1433343043 = header + 340C = 34.0C
@@ -233,7 +233,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                         // Controller responded to command
                         sendBuffer.dequeue();
                         commandPending = false;
-                        ESP_LOGD(BALBOA_TAG, "YAY: command response : %u\n", delayTime);
+                        log("YAY: command response : %u\n", delayTime);
                     }
                 }
 
@@ -251,12 +251,12 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                     //When display showing C or F, and menu mode 0x46 we're in temperature setpoint adjustment
                     if(Q_in[9] == 0x46){
                         status.targetTemp = atoi(temp)/10.0;
-                        ESP_LOGD(BALBOA_TAG, "Sent target temp data %f\n", status.targetTemp);
+                        log("Sent target temp data %f\n", status.targetTemp);
                     }else{
                         status.temp = atoi(temp)/10.0;
                         if (tubTemp != status.temp) {
                             tubTemp = status.temp;
-                            ESP_LOGD(BALBOA_TAG, "Sent temp data %f\n", tubTemp);
+                            log("Sent temp data %f\n", tubTemp);
                         }
                         setTimeToTemp(status.temp);
                     }
@@ -301,7 +301,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
             status.rawData7 = lastRaw7.c_str();
         }
     } else if (result.substring(0, 4) == "ae0d") {
-        // ESP_LOGD(BALBOA_TAG, "AE 0D");
+        // log("AE 0D");
         // telnetSend(result);
 
         String message = result.substring(0, 32);  // ignore any FB ending
@@ -324,8 +324,8 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
         }
         // end of AE 0D
     } else {
-        ESP_LOGD(BALBOA_TAG, "Unknown message (%u): ", result.length());
-        // ESP_LOGD(BALBOA_TAG, result);
+        log("Unknown message (%u): ", result.length());
+        // log(result);
         telnetSend("U: " + result);
     }
 }
@@ -341,12 +341,12 @@ void balboaGL::sendCommand() {
         digitalWrite(LED_PIN, HIGH);
 
         delayMicroseconds(delayTime);
-        ESP_LOGD(BALBOA_TAG, "Sending %s", sendBuffer.getHead().c_str());
+        log("Sending %s", sendBuffer.getHead().c_str());
         byte byteArray[9] = {0};
         hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
         tub->write(byteArray, sizeof(byteArray));
         if (digitalRead(PIN_5_PIN) != LOW) {
-            ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command before flush : %u\n", delayTime);
+            log("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
             // delayTime = 0;
             sendBuffer.dequeue();
         }
@@ -354,11 +354,11 @@ void balboaGL::sendCommand() {
         tub->flush(false);
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
-            ESP_LOGD(BALBOA_TAG, "message sent : %u\n", delayTime);
+            log("message sent : %u\n", delayTime);
             // delayTime += 10;
         }
         else {
-           ESP_LOGD(BALBOA_TAG, "ERROR: Pin5 went high before command could be sent after flush");
+           log("ERROR: Pin5 went high before command could be sent after flush");
         }
         digitalWrite(RTS_PIN, LOW);
         digitalWrite(LED_PIN, LOW);
@@ -504,17 +504,17 @@ size_t balboaGL::readSerial() {
 
 void balboaGL::setLight(boolean state) {
     if (state != status.light) {
-        ESP_LOGD(BALBOA_TAG, "setLight - Toggle");
+        log("setLight - Toggle");
         sendBuffer.enqueue(COMMAND_LIGHT);
     } else {
-        ESP_LOGD(BALBOA_TAG, "setLight - No change needed");
+        log("setLight - No change needed");
     }
 }
 
 void balboaGL::setTemp(float temperature) {
 
     if (status.targetTemp <= 0) {
-        ESP_LOGD(BALBOA_TAG, "ERROR: can't adjust target as current value not known");
+        log("ERROR: can't adjust target as current value not known");
         sendBuffer.enqueue(COMMAND_UP);  // Enter set temp mode - won't change, but should allow us to capture the set target value
         return;
     }
@@ -526,13 +526,13 @@ void balboaGL::setTemp(float temperature) {
 
     if (temperature > status.targetTemp) {
         for (int i = 0; i < (target - current); i++) {
-            ESP_LOGD(BALBOA_TAG, "Raise the temp");
+            log("Raise the temp");
             sendBuffer.enqueue(COMMAND_UP);
             // sendBuffer.enqueue(COMMAND_EMPTY);
         }
     } else {
         for (int i = 0; i < (current - target); i++) {
-            ESP_LOGD(BALBOA_TAG, "Lower the temp");
+            log("Lower the temp");
             sendBuffer.enqueue(COMMAND_DOWN);
             // sendBuffer.enqueue(COMMAND_EMPTY);
         }
