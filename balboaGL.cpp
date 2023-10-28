@@ -341,7 +341,7 @@ void balboaGL::sendCommand() {
         digitalWrite(LED_PIN, HIGH);
 
         delayMicroseconds(delayTime);
-        ESP_LOGD(BALBOA_TAG, "Sending " + sendBuffer.getHead().c_str());
+        ESP_LOGD(BALBOA_TAG, "Sending %s", sendBuffer.getHead().c_str());
         byte byteArray[9] = {0};
         hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
         tub->write(byteArray, sizeof(byteArray));
