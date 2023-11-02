@@ -342,7 +342,8 @@ void balboaGL::sendCommand() {
 
         delayMicroseconds(delayTime);
         byte byteArray[9] = {0};
-        hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
+        String cmd = sendBuffer.getHead();
+        hexCharacterStringToBytes(byteArray, cmd.c_str());
         tub->write(byteArray, sizeof(byteArray));
         if (digitalRead(PIN_5_PIN) != LOW) {
             log("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
@@ -351,10 +352,9 @@ void balboaGL::sendCommand() {
         }
         // wait for tx to finish and flush the rx buffer
         tub->flush(false);
-        log("Sent %s", sendBuffer.getHead().c_str());
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
-            log("message sent delay: %u\n", delayTime);
+            log("Sent %s with delay of %u\n", cmd.c_str(), delayTime);
             // delayTime += 10;
         }
         else {
