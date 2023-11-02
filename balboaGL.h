@@ -79,10 +79,16 @@ class balboaGL {
         this->PIN_5_PIN = panelSelectPin;
         this->LED_PIN = ledPin;
 
+        this->delayTime = 40;
+
         pinMode(RTS_PIN, OUTPUT);
         log("Setting pin %u LOW\n", RTS_PIN);
         digitalWrite(RTS_PIN, LOW);
         pinMode(PIN_5_PIN, INPUT);
+    }
+
+    void set_delay_time(int delay) {
+        this->delayTime = delay;
     }
 
 void queueCommand(String command, int count);
@@ -113,6 +119,8 @@ private:
     int LED_PIN;
 
     HardwareSerial* tub;
+
+    int delayTime;
 
     #define BUFFER_SIZE 23
     CircularBuffer<uint8_t, BUFFER_SIZE> Q_in;
