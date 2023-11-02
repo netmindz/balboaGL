@@ -341,7 +341,6 @@ void balboaGL::sendCommand() {
         digitalWrite(LED_PIN, HIGH);
 
         delayMicroseconds(delayTime);
-        log("Sending %s", sendBuffer.getHead().c_str());
         byte byteArray[9] = {0};
         hexCharacterStringToBytes(byteArray, sendBuffer.getHead().c_str());
         tub->write(byteArray, sizeof(byteArray));
@@ -352,9 +351,10 @@ void balboaGL::sendCommand() {
         }
         // wait for tx to finish and flush the rx buffer
         tub->flush(false);
+        log("Sent %s", sendBuffer.getHead().c_str());
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
-            log("message sent : %u\n", delayTime);
+            log("message sent delay: %u\n", delayTime);
             // delayTime += 10;
         }
         else {
