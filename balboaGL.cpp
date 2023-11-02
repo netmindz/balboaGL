@@ -9,8 +9,6 @@ ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large 
 
 struct BalboaStatus status;
 
-int delayTime = 40;
-
 void balboaGL::queueCommand(String command, int count) {
     log("Sending %s - %u times\n", command.c_str(), count);
     for (int i = 0; i < count; i++) {
