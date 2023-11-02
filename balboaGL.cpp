@@ -539,3 +539,13 @@ void balboaGL::setTemp(float temperature) {
     }
 }
 
+void balboaGL::buttonPressUp() {
+    queueCommand(COMMAND_UP, 1);
+}
+void balboaGL::buttonPressDown() {
+    queueCommand(COMMAND_DOWN, 1);
+
+}
+void balboaGL::buttonPressMode() {
+    queueCommand(COMMAND_CHANGE_MODE, 1);
+}

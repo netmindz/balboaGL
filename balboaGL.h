@@ -87,6 +87,10 @@ class balboaGL {
 
 void queueCommand(String command, int count);
 
+void buttonPressUp();
+void buttonPressDown();
+void buttonPressMode();
+
 void setOption(int currentIndex, int targetIndex, int options, String command);
 
 int getPanelSelectPin();
