@@ -354,7 +354,7 @@ void balboaGL::sendCommand() {
         if (digitalRead(PIN_5_PIN) == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
             log("Sent %s with delay of %u\n", cmd.c_str(), delayTime);
-            delayTime += 10;
+            // delayTime += 10;
         }
         else {
            log("ERROR: Pin5 went high before command could be sent after flush");
