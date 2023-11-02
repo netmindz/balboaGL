@@ -498,6 +498,7 @@ size_t balboaGL::readSerial() {
         return msgLength;
     }
     else {
+        status.commandQueue = sendBuffer.itemCount();
         return 0;
     }
 }
