@@ -5,6 +5,7 @@
 String result = "";
 int msgLength = 0;
 volatile byte panelSelect;
+unsigned long faStartTime;
 
 ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
 
@@ -32,6 +33,7 @@ void IRAM_ATTR clearRXBuffer() {
     // clear the rx buffer
     panelSelect = !panelSelect;
     if(panelSelect == LOW) {
+        faStartTime = micros();
         uart_flush(tubUART);
     }
 }
@@ -343,12 +345,13 @@ void balboaGL::sendCommand() {
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
+        unsigned long timeSinceFA = faStartTime - micros();
         delayMicroseconds(delayTime);
         const char* cmd = sendBuffer.getHead().c_str();
         hexCharacterStringToBytes(sendByteBuffer, cmd);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
-            log("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
+            log("ERROR: Pin5 went high before command before flush: %u interval:%u\n", delayTime, timeSinceFA);
             // delayTime = 0;
             // sendBuffer.dequeue();
         }
@@ -360,7 +363,7 @@ void balboaGL::sendCommand() {
             // delayTime += 10;
         }
         else {
-           log("ERROR: Pin5 went high before command could be sent after flush");
+           log("ERROR: Pin5 went high before command could be sent after flush interval:%u", timeSinceFA);
         }
         digitalWrite(RTS_PIN, LOW);
     }
