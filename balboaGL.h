@@ -127,7 +127,7 @@ private:
 
     unsigned long lastCmdTime = 0;
     bool commandPending = false;
-
+    byte sendByteBuffer[9] = {0};
 
 String HexString2TimeString(String hexstring);
 
