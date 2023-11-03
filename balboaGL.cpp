@@ -342,7 +342,6 @@ void balboaGL::sendCommand() {
         lastCmdTime = millis();
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
-        digitalWrite(LED_PIN, HIGH);
 
         delayMicroseconds(delayTime);
         const char* cmd = sendBuffer.getHead().c_str();
@@ -364,7 +363,6 @@ void balboaGL::sendCommand() {
            log("ERROR: Pin5 went high before command could be sent after flush");
         }
         digitalWrite(RTS_PIN, LOW);
-        digitalWrite(LED_PIN, LOW);
     }
     status.commandQueue = sendBuffer.itemCount();
 }
