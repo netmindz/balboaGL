@@ -503,7 +503,6 @@ size_t balboaGL::readSerial() {
         status.commandQueue = sendBuffer.itemCount();
         return 0;
     }
-    panelSelect = digitalRead(PIN_5_PIN); // sync the state as CHANGE doesn't tell me which way
 }
 
 void balboaGL::setLight(boolean state) {
