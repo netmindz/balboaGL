@@ -237,7 +237,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                         sendBuffer.dequeue();
                         commandPending = false;
                         log("YAY: command response : %u\n", delayTime);
-                        delayTime = 0;
+                        // delayTime = 0;
                     }
                 }
 
@@ -349,7 +349,7 @@ void balboaGL::sendCommand() {
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
             log("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
-            delayTime = 0;
+            // delayTime = 0;
             // sendBuffer.dequeue();
         }
         // wait for tx to finish and flush the rx buffer
