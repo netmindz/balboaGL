@@ -81,7 +81,7 @@ class balboaGL {
         this->PIN_5_PIN = panelSelectPin;
         this->LED_PIN = ledPin;
 
-        this->delayTime = 40;
+        this->delayTime = 20;
 
         pinMode(RTS_PIN, OUTPUT);
         log("Setting pin %u LOW\n", RTS_PIN);
