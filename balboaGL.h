@@ -38,6 +38,8 @@ extern ArduinoQueue<String> sendBuffer;
 
 extern String result;
 extern int msgLength;
+volatile extern byte panelSelect;
+
 
 struct BalboaStatus {
     float power;

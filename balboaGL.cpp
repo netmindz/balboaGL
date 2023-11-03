@@ -4,6 +4,7 @@
 
 String result = "";
 int msgLength = 0;
+volatile byte panelSelect;
 
 ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
 
@@ -29,11 +30,15 @@ void balboaGL::setOption(int currentIndex, int targetIndex, int options, String 
 // clears serial receive buffer
 void IRAM_ATTR clearRXBuffer() {
     // clear the rx buffer
-    uart_flush(tubUART);
+    panelSelect = !panelSelect;
+    if(panelSelect == LOW) {
+        uart_flush(tubUART);
+    }
 }
 
 void balboaGL::attachPanelInterrupt() {
-    attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, FALLING);
+    panelSelect = digitalRead(PIN_5_PIN); // sync the state as CHANGE doesn't tell me which way
+    attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, CHANGE);
 }
 
 void balboaGL::detachPanelInterrupt() {
@@ -343,14 +348,14 @@ void balboaGL::sendCommand() {
         const char* cmd = sendBuffer.getHead().c_str();
         hexCharacterStringToBytes(sendByteBuffer, cmd);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
-        if (digitalRead(PIN_5_PIN) != LOW) {
+        if (panelSelect != LOW) {
             log("ERROR: Pin5 went high before command before flush : %u\n", delayTime);
             delayTime = 0;
             // sendBuffer.dequeue();
         }
         // wait for tx to finish and flush the rx buffer
         tub->flush(false);
-        if (digitalRead(PIN_5_PIN) == LOW) {
+        if (panelSelect == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
             log("Sent %s with delay of %u\n", cmd, delayTime);
             // delayTime += 10;
@@ -483,7 +488,6 @@ int balboaGL::waitforGLBytes() {
 }
 
 size_t balboaGL::readSerial() {
-    bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
     // is data available and we are selected
     if ((tub->available() > 0) && (panelSelect == LOW)) {
         int msgLength = waitforGLBytes();
@@ -499,6 +503,7 @@ size_t balboaGL::readSerial() {
         status.commandQueue = sendBuffer.itemCount();
         return 0;
     }
+    panelSelect = digitalRead(PIN_5_PIN); // sync the state as CHANGE doesn't tell me which way
 }
 
 void balboaGL::setLight(boolean state) {
