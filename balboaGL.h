@@ -39,7 +39,6 @@ extern ArduinoQueue<String> sendBuffer;
 extern String result;
 extern int msgLength;
 volatile extern byte panelSelect;
-volatile extern unsigned long faStartTime;
 
 
 struct BalboaStatus {
