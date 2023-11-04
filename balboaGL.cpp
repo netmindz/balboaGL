@@ -563,7 +563,7 @@ void balboaGL::buttonPressTime() {
 }
 
 void balboaGL::setPumpState(u_int8_t pump, u_int8_t stateIndex) {
-    log("onPumpSwitchStateChanged %u %u\n", pump, stateIndex);
+    log("onPumpSwitchStateChanged %u %u", pump, stateIndex);
     int currentIndex;
     String command;
     int options;
@@ -585,4 +585,11 @@ void balboaGL::setPumpState(u_int8_t pump, u_int8_t stateIndex) {
             break;
     }
     setOption(currentIndex, stateIndex, options, command);
+}
+
+void balboaGL::setMode(u_int8_t targetMode) {
+    log("Mode Switch changed - %u", index);
+    queueCommand(COMMAND_CHANGE_MODE);
+    setOption(status.mode, targetMode, 3, COMMAND_DOWN);
+    queueCommand(COMMAND_CHANGE_MODE);
 }

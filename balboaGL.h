@@ -113,6 +113,8 @@ void setTemp(float temperature);
 
 void setPumpState(u_int8_t pump, u_int8_t stateIndex);
 
+void setMode(u_int8_t targetMode);
+
 void detachPanelInterrupt();
 void attachPanelInterrupt();
 
