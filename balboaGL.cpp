@@ -484,7 +484,7 @@ int balboaGL::waitforGLBytes() {
             msgLength = 16;
             break;
         default:
-            ESP_LOGW(BALBOA_TAG, "Unknown message start Byte: ");
+            // log("Unknown message start Byte: ");
             int unknownByte = tub->read();
             //ESP_LOGW(BALBOA_TAG, unknownByte, HEX);
             return 0;
@@ -493,7 +493,7 @@ int balboaGL::waitforGLBytes() {
     unsigned long startTime = micros();
     while (tub->available() < msgLength) {
         if (micros() - startTime >= readBytesTimeout) {
-            ESP_LOGW(BALBOA_TAG, "Timeout: %u bytes not available in 2.5ms\n", msgLength);
+            log("Timeout: %u bytes not available in 2.5ms\n", msgLength);
             return 0;
         }
     }
