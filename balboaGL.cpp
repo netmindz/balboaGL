@@ -6,6 +6,8 @@ String result = "";
 int msgLength = 0;
 volatile byte panelSelect;
 unsigned long msgStartTime;
+unsigned long timeSinceMsgStart;
+
 
 ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
 
@@ -252,7 +254,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                     if(commandPending) {
                         // Controller responded to command
                         dequeueCommand();
-                        log("YAY: command response : %u\n", delayTime);
+                        log("YAY: command response : %u\n", timeSinceMsgStart);
                         // delayTime = 0;
                     }
                 }
@@ -359,11 +361,11 @@ void balboaGL::sendCommand() {
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
-        unsigned long timeSinceFA = micros() - msgStartTime;
+        timeSinceMsgStart = micros() - msgStartTime;
         delayMicroseconds(delayTime);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
-            log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceFA);
+            log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceMsgStart);
             // delayTime = 0;
             // dequeueCommand();
         }
@@ -371,11 +373,11 @@ void balboaGL::sendCommand() {
         tub->flush(false);
         if (panelSelect == LOW) {
             // dequeueCommand(); // TODO: trying to resend now till we see response
-            log("Sent with delay of %u interval:%u", delayTime, timeSinceFA);
+            log("Sent with delay of %u interval:%u", delayTime, timeSinceMsgStart);
             // delayTime += 10;
         }
         else {
-           log("ERROR: Pin5 went high before command could be sent after flush interval:%u", timeSinceFA);
+           log("ERROR: Pin5 went high before command could be sent after flush interval:%u", timeSinceMsgStart);
         }
         digitalWrite(RTS_PIN, LOW);
     }
