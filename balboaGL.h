@@ -93,7 +93,6 @@ class balboaGL {
         this->delayTime = delay;
     }
 
-void queueCommand(String command, int count);
 
 void buttonPressUp();
 void buttonPressDown();
@@ -137,6 +136,7 @@ String HexString2ASCIIString(String hexstring);
 
 byte nibble(char c);
 
+void queueCommand(String command, int count=1);
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 void setTimeToTemp(double currentTemp);
 int waitforGLBytes();

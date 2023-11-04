@@ -345,13 +345,13 @@ void balboaGL::sendCommand() {
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
-        unsigned long timeSinceFA = faStartTime - micros();
+        unsigned long timeSinceFA = micros() - faStartTime;
         delayMicroseconds(delayTime);
         const char* cmd = sendBuffer.getHead().c_str();
         hexCharacterStringToBytes(sendByteBuffer, cmd);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
-            log("ERROR: Pin5 went high before command before flush: %u interval:%u\n", delayTime, timeSinceFA);
+            log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceFA);
             // delayTime = 0;
             // sendBuffer.dequeue();
         }
@@ -359,7 +359,7 @@ void balboaGL::sendCommand() {
         tub->flush(false);
         if (panelSelect == LOW) {
             // sendBuffer.dequeue(); // TODO: trying to resend now till we see response
-            log("Sent %s with delay of %u\n", cmd, delayTime);
+            log("Sent %s with delay of %u interval:%u", cmd, delayTime, timeSinceFA);
             // delayTime += 10;
         }
         else {
@@ -502,6 +502,11 @@ size_t balboaGL::readSerial() {
     }
     else {
         status.commandQueue = sendBuffer.itemCount();
+        byte state = digitalRead(PIN_5_PIN); // sync the state as we can't be sure we start correctly
+        if(panelSelect != state) {
+            panelSelect = state;
+            log("Resync panelSelect state");
+        }
         return 0;
     }
 }
@@ -509,7 +514,7 @@ size_t balboaGL::readSerial() {
 void balboaGL::setLight(boolean state) {
     if (state != status.light) {
         log("setLight - Toggle");
-        sendBuffer.enqueue(COMMAND_LIGHT);
+        queueCommand(COMMAND_LIGHT);
     } else {
         log("setLight - No change needed");
     }
@@ -519,26 +524,26 @@ void balboaGL::setTemp(float temperature) {
 
     if (status.targetTemp <= 0) {
         log("ERROR: can't adjust target as current value not known");
-        sendBuffer.enqueue(COMMAND_UP);  // Enter set temp mode - won't change, but should allow us to capture the set target value
+        queueCommand(COMMAND_UP);  // Enter set temp mode - won't change, but should allow us to capture the set target value
         return;
     }
 
     int target = temperature * 2;  // 0.5 inc so double
     int current = status.targetTemp * 2;
-    sendBuffer.enqueue(COMMAND_UP);  // Enter set temp mode
-    sendBuffer.enqueue(COMMAND_EMPTY);
+    queueCommand(COMMAND_UP);  // Enter set temp mode
+    queueCommand(COMMAND_EMPTY);
 
     if (temperature > status.targetTemp) {
         for (int i = 0; i < (target - current); i++) {
             log("Raise the temp");
-            sendBuffer.enqueue(COMMAND_UP);
-            // sendBuffer.enqueue(COMMAND_EMPTY);
+            queueCommand(COMMAND_UP);
+            // queueCommand(COMMAND_EMPTY);
         }
     } else {
         for (int i = 0; i < (current - target); i++) {
             log("Lower the temp");
-            sendBuffer.enqueue(COMMAND_DOWN);
-            // sendBuffer.enqueue(COMMAND_EMPTY);
+            queueCommand(COMMAND_DOWN);
+            // queueCommand(COMMAND_EMPTY);
         }
     }
 }
