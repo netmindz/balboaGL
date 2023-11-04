@@ -100,7 +100,6 @@ void buttonPressMode();
 void buttonPressTime();
 
 
-void setOption(int currentIndex, int targetIndex, int options, String command);
 
 int getPanelSelectPin();
 
@@ -111,6 +110,8 @@ size_t readSerial();
 void setLight(boolean state);
 
 void setTemp(float temperature);
+
+void setPumpState(u_int8_t pump, u_int8_t stateIndex);
 
 void detachPanelInterrupt();
 void attachPanelInterrupt();
@@ -139,6 +140,7 @@ String HexString2ASCIIString(String hexstring);
 byte nibble(char c);
 
 void queueCommand(String command, int count=1);
+void setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command);
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 void setTimeToTemp(double currentTemp);
 int waitforGLBytes();

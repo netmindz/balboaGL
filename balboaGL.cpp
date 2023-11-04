@@ -18,7 +18,7 @@ void balboaGL::queueCommand(String command, int count) {
     }
 }
 
-void balboaGL::setOption(int currentIndex, int targetIndex, int options, String command) {
+void balboaGL::setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command) {
     if (targetIndex > currentIndex) {
         queueCommand(command, (targetIndex - currentIndex));
     } else if (currentIndex != targetIndex) {
@@ -560,4 +560,29 @@ void balboaGL::buttonPressMode() {
 }
 void balboaGL::buttonPressTime() {
     queueCommand(COMMAND_TIME, 1);
+}
+
+void balboaGL::setPumpState(u_int8_t pump, u_int8_t stateIndex) {
+    log("onPumpSwitchStateChanged %u %u\n", pump, stateIndex);
+    int currentIndex;
+    String command;
+    int options;
+    switch(pump) {
+        case 1:
+            currentIndex = status.pump1;
+            command = COMMAND_JET1;
+            options = PUMP1_STATE_HIGH + 1;
+            break;
+        case 2:
+            currentIndex = status.pump2;
+            command = COMMAND_JET2;
+            options = PUMP2_STATE_HIGH + 1;
+            break;
+        case 3:    
+            currentIndex = 0; // TODO status.aux;
+            command = COMMAND_AUX;
+            options = AUX_STATE_HIGH + 1;
+            break;
+    }
+    setOption(currentIndex, stateIndex, options, command);
 }
