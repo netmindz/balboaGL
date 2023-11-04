@@ -558,3 +558,6 @@ void balboaGL::buttonPressDown() {
 void balboaGL::buttonPressMode() {
     queueCommand(COMMAND_CHANGE_MODE, 1);
 }
+void balboaGL::buttonPressTime() {
+    queueCommand(COMMAND_TIME, 1);
+}

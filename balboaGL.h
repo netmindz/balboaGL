@@ -97,6 +97,8 @@ class balboaGL {
 void buttonPressUp();
 void buttonPressDown();
 void buttonPressMode();
+void buttonPressTime();
+
 
 void setOption(int currentIndex, int targetIndex, int options, String command);
 
