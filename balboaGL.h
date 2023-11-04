@@ -142,6 +142,7 @@ String HexString2ASCIIString(String hexstring);
 byte nibble(char c);
 
 void queueCommand(String command, int count=1);
+void dequeueCommand();
 void setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command);
 void hexCharacterStringToBytes(byte* byteArray, const char* hexString);
 void setTimeToTemp(double currentTemp);
