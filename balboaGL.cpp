@@ -5,7 +5,7 @@
 String result = "";
 int msgLength = 0;
 volatile byte panelSelect;
-unsigned long faStartTime;
+unsigned long msgStartTime;
 
 ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
 
@@ -48,7 +48,7 @@ void IRAM_ATTR clearRXBuffer() {
     // clear the rx buffer
     panelSelect = !panelSelect;
     if(panelSelect == LOW) {
-        faStartTime = micros();
+        msgStartTime = micros();
         uart_flush(tubUART);
     }
 }
@@ -359,7 +359,7 @@ void balboaGL::sendCommand() {
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
-        unsigned long timeSinceFA = micros() - faStartTime;
+        unsigned long timeSinceFA = micros() - msgStartTime;
         delayMicroseconds(delayTime);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
@@ -565,7 +565,6 @@ void balboaGL::buttonPressUp() {
 }
 void balboaGL::buttonPressDown() {
     queueCommand(COMMAND_DOWN, 1);
-
 }
 void balboaGL::buttonPressMode() {
     queueCommand(COMMAND_CHANGE_MODE, 1);
