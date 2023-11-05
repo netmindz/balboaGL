@@ -4,10 +4,8 @@
 
 String result = "";
 int msgLength = 0;
-volatile byte panelSelect;
 unsigned long msgStartTime;
 unsigned long timeSinceMsgStart;
-
 
 ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
 
@@ -37,16 +35,12 @@ void balboaGL::setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t o
 // clears serial receive buffer
 void IRAM_ATTR clearRXBuffer() {
     // clear the rx buffer
-    panelSelect = !panelSelect;
-    if(panelSelect == LOW) {
-        msgStartTime = micros();
-        uart_flush(tubUART);
-    }
+    msgStartTime = micros();
+    uart_flush(tubUART);
 }
 
 void balboaGL::attachPanelInterrupt() {
-    panelSelect = digitalRead(PIN_5_PIN); // sync the state as CHANGE doesn't tell me which way
-    attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(PIN_5_PIN), clearRXBuffer, FALLING);
 }
 
 void balboaGL::detachPanelInterrupt() {
@@ -355,14 +349,14 @@ void balboaGL::sendCommand() {
         const char* cmd = sendBuffer.getHead().c_str();
         hexCharacterStringToBytes(sendByteBuffer, cmd);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
-        if (panelSelect != LOW) {
+        if (digitalRead(PIN_5_PIN) != LOW) {
             log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceMsgStart);
             // delayTime = 0;
             // dequeueCommand();
         }
         // wait for tx to finish and flush the rx buffer
         tub->flush(false);
-        if (panelSelect == LOW) {
+        if (digitalRead(PIN_5_PIN) == LOW) {
             // dequeueCommand(); // TODO: trying to resend now till we see response
             log("Sent with delay of %u interval:%u", delayTime, timeSinceMsgStart);
             // delayTime += 10;
@@ -493,6 +487,7 @@ int balboaGL::waitforGLBytes() {
 }
 
 size_t balboaGL::readSerial() {
+    bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
     // is data available and we are selected
     if ((tub->available() > 0) && (panelSelect == LOW)) {
         int msgLength = waitforGLBytes();
