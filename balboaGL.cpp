@@ -18,21 +18,10 @@ void balboaGL::queueCommand(String command, int count) {
     for (int i = 0; i < count; i++) {
         sendBuffer.enqueue(command.c_str());
     }
-    // queue up next bytes for maximum speed
-    const char* cmd = sendBuffer.getHead().c_str();
-    hexCharacterStringToBytes(sendByteBuffer, cmd);
 }
 void balboaGL::dequeueCommand() {
-
     sendBuffer.dequeue();
     commandPending = false;
-    memset(sendByteBuffer, 0, sizeof(sendByteBuffer));
-    
-    if(!sendBuffer.isEmpty()) {
-        // queue up next bytes for maximum speed
-        const char* cmd = sendBuffer.getHead().c_str();
-        hexCharacterStringToBytes(sendByteBuffer, cmd);
-    }
 }
 
 void balboaGL::setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command) {
@@ -363,6 +352,8 @@ void balboaGL::sendCommand() {
 
         timeSinceMsgStart = micros() - msgStartTime;
         delayMicroseconds(delayTime);
+        const char* cmd = sendBuffer.getHead().c_str();
+        hexCharacterStringToBytes(sendByteBuffer, cmd);
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (panelSelect != LOW) {
             log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceMsgStart);
