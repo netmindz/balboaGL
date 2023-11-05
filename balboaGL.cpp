@@ -501,11 +501,6 @@ size_t balboaGL::readSerial() {
     }
     else {
         status.commandQueue = sendBuffer.itemCount();
-        byte state = digitalRead(PIN_5_PIN); // sync the state as we can't be sure we start correctly
-        if(panelSelect != state) {
-            panelSelect = state;
-            log("Resync panelSelect state");
-        }
         return 0;
     }
 }
