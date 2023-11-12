@@ -333,6 +333,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
         // log(result);
         telnetSend("U: " + result);
     }
+    status.commandQueue = sendBuffer.itemCount();
 }
 
 void balboaGL::sendCommand() {
@@ -500,7 +501,6 @@ size_t balboaGL::readSerial() {
         return msgLength;
     }
     else {
-        status.commandQueue = sendBuffer.itemCount();
         return 0;
     }
 }
