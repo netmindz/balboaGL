@@ -525,19 +525,16 @@ void balboaGL::setTemp(float temperature) {
     int target = temperature * 2;  // 0.5 inc so double
     int current = status.targetTemp * 2;
     queueCommand(COMMAND_UP);  // Enter set temp mode
-    queueCommand(COMMAND_EMPTY);
 
     if (temperature > status.targetTemp) {
         for (int i = 0; i < (target - current); i++) {
             log("Raise the temp");
             queueCommand(COMMAND_UP);
-            // queueCommand(COMMAND_EMPTY);
         }
     } else {
         for (int i = 0; i < (current - target); i++) {
             log("Lower the temp");
             queueCommand(COMMAND_DOWN);
-            // queueCommand(COMMAND_EMPTY);
         }
     }
 }
