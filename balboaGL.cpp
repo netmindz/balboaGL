@@ -487,10 +487,10 @@ int balboaGL::waitforGLBytes() {
     return msgLength;
 }
 
-size_t balboaGL::readSerial() {
+boolean balboaGL::readSerial() {
     bool panelSelect = digitalRead(PIN_5_PIN);  // LOW when we are meant to read data
     // is data available and we are selected
-    if ((tub->available() > 0) && (panelSelect == LOW)) {
+    if ((panelSelect == LOW) && (tub->available() > 0)) {
         int msgLength = waitforGLBytes();
         // only do something if we've got a message
         if (msgLength > 0) {
@@ -498,11 +498,8 @@ size_t balboaGL::readSerial() {
             tub->read(buf, msgLength);
             handleMessage(msgLength, buf);
         }
-        return msgLength;
     }
-    else {
-        return 0;
-    }
+    return panelSelect;
 }
 
 void balboaGL::setLight(boolean state) {

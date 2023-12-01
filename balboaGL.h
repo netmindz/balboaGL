@@ -99,12 +99,6 @@ void buttonPressTime();
 
 
 
-int getPanelSelectPin();
-
-int getRTSPin();
-
-size_t readSerial();
-
 void setLight(boolean state);
 
 void setTemp(float temperature);
@@ -112,6 +106,8 @@ void setTemp(float temperature);
 void setPumpState(u_int8_t pump, u_int8_t stateIndex);
 
 void setMode(u_int8_t targetMode);
+
+boolean readSerial();
 
 void detachPanelInterrupt();
 void attachPanelInterrupt();
@@ -147,6 +143,8 @@ void setTimeToTemp(double currentTemp);
 int waitforGLBytes();
 void sendCommand();
 void handleMessage(size_t len, uint8_t buf[]);
+int getPanelSelectPin();
+int getRTSPin();
 
 };
 
