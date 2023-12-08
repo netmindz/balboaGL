@@ -95,7 +95,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
         // fa1433343043 = header + 340C = 34.0C
 
         // If messages is temp or ---- for temp, it is status message
-        if (result.substring(10, 12) == "43" || result.substring(10, 12) == "2d") {
+        if (result.substring(10, 12) == "43"  || result.substring(10, 12) == "46" || result.substring(10, 12) == "2d") {
             tubpowerCalc = 0;
             String pump = result.substring(13, 14);
 
