@@ -20,6 +20,7 @@ void balboaGL::queueCommand(String command, int count) {
 void balboaGL::dequeueCommand() {
     sendBuffer.dequeue();
     commandPending = false;
+    lastCmdTime = millis();
 }
 
 void balboaGL::setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command) {
@@ -343,7 +344,6 @@ void balboaGL::sendCommand() {
         return;
     }
     if((millis() - lastCmdTime) >= 500) {
-        lastCmdTime = millis();
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
