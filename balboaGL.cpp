@@ -229,9 +229,9 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                 String cmd = result.substring(34, 44);
                 if (cmd == "0000000000") {
                     // none
-                } else if (cmd.substring(0, 4) == "01") {
+                } else if (cmd.substring(0, 2) == "01") {
                     state = "Temp Up";
-                } else if (cmd.substring(0, 4) == "02") {
+                } else if (cmd.substring(0, 2) == "02") {
                     state = "Temp Down";
                 } else {
                     telnetSend("CMD: " + cmd);
