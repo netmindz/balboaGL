@@ -3,7 +3,6 @@
 #define COMMAND_UP          "fb0603450e0001fe66"
 #define COMMAND_DOWN        "fb0603450e0002fd50"
 //#define COMMAND_TOGGLE      "fb066666666609f6c2"
-// #define COMMAND_TIME        "fb066666666603fc76"
 #define COMMAND_TIME        "fb0664d4060003fc76"
 #define COMMAND_CHANGE_MODE "fb0603450e0004fb3c"
 #define COMMAND_AUX         "fb0603450e000af5c0"
@@ -34,8 +33,6 @@
 #else
 #define AUX_STATE_HIGH 1
 #endif 
-
-#define FA_MESSAGE_LENGTH 46
 
 #define STATUS_BOOT 0
 #define STATUS_WIFI 2
