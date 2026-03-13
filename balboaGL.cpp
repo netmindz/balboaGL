@@ -7,7 +7,7 @@ int msgLength = 0;
 unsigned long msgStartTime;
 unsigned long timeSinceMsgStart;
 
-ArduinoQueue<String> sendBuffer(10);  // TODO: might be better bigger for large temp changes. Would need testing
+ArduinoQueue<String> sendBuffer(30);  // TODO: might be better bigger for large temp changes. Would need testing
 
 struct BalboaStatus status;
 
@@ -20,7 +20,6 @@ void balboaGL::queueCommand(String command, int count) {
 void balboaGL::dequeueCommand() {
     sendBuffer.dequeue();
     commandPending = false;
-    lastCmdTime = millis();
 }
 
 void balboaGL::setOption(u_int8_t currentIndex, u_int8_t targetIndex, u_int8_t options, String command) {
@@ -179,7 +178,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                     state = "Sleep";
                     status.mode = MODE_IDX_SLP;
                 } else if (s == "9") {
-                    state = "Circulation ?";
+                    state = "Circulation";
                     status.mode = MODE_IDX_STD;  // TODO: confirm
                 } else if (s == "1") {
                     state = "Standard";
@@ -190,7 +189,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                 } else if (s == "a") {
                     state = "Cleaning";  // TODO: can't tell our actual mode here - could be any of the 3 I think
                 } else if (s == "c") {
-                    state = "Circulation in sleep?";
+                    state = "Circulation in sleep";
                     status.mode = MODE_IDX_SLP;
                 } else if (s == "b" || s == "3") {
                     state = "Std in Eco";  // Was in eco, Swap to STD for 1 hour only
@@ -205,7 +204,7 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                 } else if (menu == "4c") {
                     state = "Set Mode";
                 } else if (menu == "46") {
-                    state = "Set Temp";
+                    state = "Set Temperature";
                 } else if (menu == "5a") {
                     state = "Standby?";  // WT: not tested to confirm if this is the act of setting Standby or just seen
                                          // when in standby
@@ -241,13 +240,11 @@ void balboaGL::handleMessage(size_t len, uint8_t buf[]) {
                         // Controller responded to command
                         dequeueCommand();
                         log("YAY: command response : %u\n", timeSinceMsgStart);
-                        // delayTime = 0;
                     }
-                }
-
-                if (!lastRaw3.equals(cmd) && cmd != "0000000000") {  // ignore idle command
                     lastRaw3 = cmd;
-                    status.rawData3 = lastRaw3.c_str();
+                    if(cmd != "0000000000") {  // ignore idle command
+                        status.rawData3 = lastRaw3.c_str();
+                    }
                 }
 
 
@@ -343,7 +340,8 @@ void balboaGL::sendCommand() {
     if (sendBuffer.isEmpty()) {
         return;
     }
-    if((millis() - lastCmdTime) >= 500) {
+    if((millis() - lastCmdTime) >= 400) {
+        lastCmdTime = millis();
         commandPending = true;
         digitalWrite(RTS_PIN, HIGH);
 
@@ -354,19 +352,18 @@ void balboaGL::sendCommand() {
         tub->write(sendByteBuffer, sizeof(sendByteBuffer));
         if (digitalRead(PIN_5_PIN) != LOW) {
             log("ERROR: Pin5 went high before command before flush: %u interval:%u", delayTime, timeSinceMsgStart);
-            // delayTime = 0;
-            // dequeueCommand();
+            delayTime = 20;
+            dequeueCommand();
         }
         // wait for tx to finish and flush the rx buffer
-        tub->flush(false);
+        tub->flush(true);
         if (digitalRead(PIN_5_PIN) == LOW) {
-            // dequeueCommand(); // TODO: trying to resend now till we see response
             log("Sent with delay of %u interval:%u", delayTime, timeSinceMsgStart);
-            // delayTime += 10;
         }
         else {
            log("ERROR: Pin5 went high before command could be sent after flush interval:%u", timeSinceMsgStart);
         }
+        delay(1);
         digitalWrite(RTS_PIN, LOW);
     }
 }
@@ -577,7 +574,7 @@ void balboaGL::setPumpState(u_int8_t pump, u_int8_t stateIndex) {
 }
 
 void balboaGL::setMode(u_int8_t targetMode) {
-    log("Mode Switch changed - %u", index);
+    log("Mode Switch changed - %u", targetMode);
     queueCommand(COMMAND_CHANGE_MODE);
     setOption(status.mode, targetMode, 3, COMMAND_DOWN);
     queueCommand(COMMAND_CHANGE_MODE);
